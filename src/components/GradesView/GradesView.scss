@@ -122,3 +122,51 @@ select#ScoreView.form-control {
         border-right-color: $black;
     }
 }
+
+// Table First column and Header fixer.
+
+// These overflow configs are needed for the sticky to work.
+.pgn__data-table-container {
+  overflow-x: initial;
+  overflow-y: initial;
+}
+
+.pgn__data-table-layout-wrapper {
+  overflow-x: initial;
+}
+
+.pgn__data-table thead tr {
+  position: relative;
+}
+
+.pgn__data-table thead tr th,
+.pgn__data-table tbody tr td {
+  z-index: 0;
+}
+
+.pgn__data-table thead tr th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.pgn__data-table thead tr th:first-child {
+  z-index: 3;
+  left: 0;
+}
+
+.pgn__data-table tbody tr td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 0 0 7px 5px rgba(0, 0, 0, 0.1);
+  clip-path: inset(0px -15px 0px 0px);
+}
+
+.pgn__data-table tbody tr:nth-child(odd) td {
+  background-color: white;
+}
+
+.pgn__data-table tbody tr:nth-child(even) td {
+  background-color: $light-200;
+}
