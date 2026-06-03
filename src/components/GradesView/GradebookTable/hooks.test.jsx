@@ -77,7 +77,6 @@ const headings = [
   Headings.totalGrade,
   Headings.username,
   Headings.email,
-  Headings.fullName,
   testHeading,
 ];
 
