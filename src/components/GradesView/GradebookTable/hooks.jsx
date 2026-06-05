@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { getConfig } from '@edx/frontend-platform';
 import { useIntl } from '@edx/frontend-platform/i18n';
 
 import { selectors } from 'data/redux/hooks';
@@ -18,6 +19,14 @@ export const useGradebookTableData = () => {
   const { formatMessage } = useIntl();
   const grades = selectors.grades.useAllGrades();
   const headings = selectors.root.useGetHeadings();
+  const { GRADEBOOK_TABLE_ENABLE_FULL_NAME: enableFullName = false } = getConfig() ?? {};
+
+  const filteredHeadings = headings.filter((heading) => {
+    if (enableFullName) {
+      return heading !== Headings.username;
+    }
+    return heading !== Headings.fullName;
+  });
 
   const mapHeaders = (heading) => {
     let label;
@@ -35,22 +44,32 @@ export const useGradebookTableData = () => {
     return { Header: label, accessor: heading };
   };
 
-  const mapRows = entry => ({
-    [Headings.username]: (
-      <Fields.Username username={entry.username} userKey={entry.external_user_key} />
-    ),
-    [Headings.email]: (<Fields.Text value={entry.email} />),
-    [Headings.totalGrade]: `${roundGrade(entry.percent * 100)}${getLocalizedPercentSign()}`,
-    ...entry.section_breakdown.reduce((acc, subsection) => ({
-      ...acc,
-      [subsection.label]: <GradeButton {...{ entry, subsection }} />,
-    }), {}),
-  });
+  const mapRows = (entry) => {
+    const usernameOrFullName = enableFullName
+      ? {
+        [Headings.fullName]: <Fields.Text value={entry?.full_name || ''} />,
+      }
+      : {
+        [Headings.username]: (
+          <Fields.Username username={entry.username} userKey={entry.external_user_key} />
+        ),
+      };
+
+    return {
+      ...usernameOrFullName,
+      [Headings.email]: <Fields.Text value={entry.email} />,
+      [Headings.totalGrade]: `${roundGrade(entry.percent * 100)}${getLocalizedPercentSign()}`,
+      ...entry.section_breakdown.reduce((acc, subsection) => ({
+        ...acc,
+        [subsection.label]: <GradeButton {...{ entry, subsection }} />,
+      }), {}),
+    };
+  };
 
   const nullMethod = () => null;
 
   return {
-    columns: headings.map(mapHeaders),
+    columns: filteredHeadings.map(mapHeaders),
     data: grades.map(mapRows),
     grades,
     nullMethod,
